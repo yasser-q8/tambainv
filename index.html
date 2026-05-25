@@ -163,7 +163,7 @@
                 <div class="company-titles">
                     <div class="company-name-ar">شركة مجموعة تامبا الذهبية للتجارة العامة والمقاولات</div>
                     <div class="company-name-en">Golden Tampa Trading & Contracting Co.</div>
-                    <div class="invoice-badge" id="mainInvoiceTitleDisplay">فاتورة بيع آجلة رقم: INV-3085</div>
+                    <div class="invoice-badge" id="mainInvoiceTitleDisplay">فاتورة بيع آجلة رقم: 1000</div>
                 </div>
                 <div style="width:85px;"></div>
                 <div class="top-buttons no-print">
@@ -206,7 +206,7 @@
                     </div>
                     <div class="field-group">
                         <label>🔢 رقم الفاتورة</label>
-                        <input type="text" id="invoiceNumber" class="control-input" value="INV-3085">
+                        <input type="text" id="invoiceNumber" class="control-input" value="1000">
                     </div>
                     <div class="field-group" id="freeDiscountInputGroup" style="display: none;">
                         <label>📉 تمثل خصم بنسبة (%)</label>
@@ -504,7 +504,7 @@
             localStorage.setItem('tamba_last_invoice_serial', nextInvoice);
             updateHeaderTitle();
         } else {
-            invoiceNumInput.value = "INV-3086";
+            invoiceNumInput.value = "1000";
             localStorage.setItem('tamba_last_invoice_serial', invoiceNumInput.value);
             updateHeaderTitle();
         }
