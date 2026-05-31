@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تامبا الذهبية - نظام فواتير متقدم (النسخة النهائية)</title>
+    <title>تامبا الذهبية - نظام فواتير متقدم</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -25,7 +25,6 @@
         .company-name-en { font-size: 15px; color: #4a4a4a; margin-top: 6px; font-weight: bold; }
         .invoice-badge { background: #b22234; color: white; padding: 8px 30px; border-radius: 40px; font-weight: bold; font-size: 18px; display: inline-block; margin-top: 12px; }
         
-        /* أزرار الإجراءات العلوية */
         .top-buttons {
             position: absolute; left: 0; top: 0;
             display: flex; gap: 10px;
@@ -39,7 +38,6 @@
         .new-invoice-btn:hover { background: #0f3b52; }
         .clear-btn-top:hover { background: #a71d2a; transform: scale(1.02); }
         
-        /* تخصيص عرض العميل */
         .customer-section {
             background: #fdfdfd; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px;
             margin-bottom: 30px; display: flex; flex-direction: column; gap: 20px;
@@ -56,7 +54,6 @@
         .control-input, .control-select { width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: white; font-family: inherit; }
         .control-input:focus, .control-select:focus { border-color: #b22234; outline: none; }
         
-        /* تكبير رقم الفاتورة */
         #invoiceNumber {
             font-size: 1.25rem;
             padding: 12px;
@@ -65,7 +62,6 @@
             text-align: center;
         }
 
-        /* تكبير الدوائر واختيار نوع الفاتورة */
         input[type="radio"] {
             width: 18px;
             height: 18px;
@@ -119,21 +115,58 @@
         .saved-table th, .saved-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         .saved-table th { background: #1e4a6b; color: white; }
         
-        /* أزرار الإجراءات في الفواتير المحفوظة */
         .action-cell { display: flex; gap: 5px; justify-content: center; }
         .edit-btn { background: #ffc107; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; }
         .delete-btn { background: #dc3545; border: none; color: white; padding: 5px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; }
         .delete-btn:hover { background: #c82333; }
 
-        .pdf-mode .no-print { display: none !important; }
+        /* تنسيقات الـ PDF - تكبير 5% فقط للخط العام */
         .pdf-mode { padding: 20px !important; box-shadow: none !important; border-radius: 0 !important; }
-        .temp-pdf-text { font-family: 'Arial', sans-serif; font-weight: bold; color: #000; }
+        .pdf-mode * { font-size: 105% !important; }
+        .pdf-mode .company-name-ar { font-size: calc(26px * 1.1 * 1.05) !important; } /* تكبير إضافي 10% */
+        .pdf-mode .company-name-en { font-size: calc(15px * 1.1 * 1.05) !important; }
+        .pdf-mode .items-table td, .pdf-mode .items-table th { border: 1px solid #999 !important; } /* أغمق 25% */
+        .pdf-mode .items-table .total-cell, .pdf-mode .row-total { font-size: 115% !important; font-weight: bold !important; }
         
-        /* تنسيقات الـ PDF المطلوبة (1 سم بين الحقول) */
+        /* إخفاء عناصر التحكم في PDF */
+        .pdf-mode .remove-row-btn,
+        .pdf-mode .add-row-btn,
+        .pdf-mode .top-buttons,
+        .pdf-mode .action-buttons,
+        .pdf-mode .no-print,
+        .pdf-mode input[type="radio"],
+        .pdf-mode .discount-controls select,
+        .pdf-mode .discount-controls input,
+        .pdf-mode .clear-btn-top,
+        .pdf-mode .new-invoice-btn,
+        .pdf-mode #addItemBtn,
+        .pdf-mode .autocomplete-list,
+        .pdf-mode hr.no-print,
+        .pdf-mode .btn-action {
+            display: none !important;
+        }
+        
+        /* إظهار النص البديل */
+        .pdf-mode .temp-pdf-text {
+            display: inline-block !important;
+        }
+        
+        .temp-pdf-text {
+            display: none;
+        }
+        
+        /* إظهار القيم النصية للخلايا */
+        .pdf-mode .tension-val,
+        .pdf-mode .price-val,
+        .pdf-mode .row-total,
+        .pdf-mode .qty-val {
+            display: inline-block !important;
+        }
+        
         .pdf-mode #customerRowFields {
             display: flex;
             flex-direction: column;
-            gap: 0.1cm; /* مسافة 1 سم بين العميل والفرع والمورد والتاريخ */
+            gap: 0.1cm;
             margin-bottom: 1cm;
         }
         .pdf-mode #customerRowFields .field-group {
@@ -145,6 +178,7 @@
             margin-bottom: 0;
             font-size: 1.2rem;
             min-width: 150px;
+            display: inline-block !important;
         }
 
         @media (max-width: 760px) {
@@ -212,11 +246,14 @@
                         <label>📉 تمثل خصم بنسبة (%)</label>
                         <input type="number" id="freeDiscountPercent" class="control-input" value="10" min="0" max="100">
                     </div>
-                    <div></div> </div>
+                    <div></div>
+                </div>
             </div>
 
             <table class="items-table" id="itemsTable">
-                <thead><tr><th>الصنف</th><th style="width: 100px;">الوحدة</th><th style="width: 120px;">السعر (د.ك)</th><th style="width: 100px;">الكمية</th><th style="width: 120px;">الإجمالي (د.ك)</th><th class="no-print" style="width:50px"></th></tr></thead>
+                <thead>
+                    <tr><th>الصنف</th><th>الوحدة</th><th>الشد</th><th>السعر (د.ك)</th><th>الكمية</th><th>الإجمالي (د.ك)</th><th class="no-print"></th></tr>
+                </thead>
                 <tbody id="invoiceRows"></tbody>
             </table>
             <button type="button" class="add-row-btn no-print" id="addItemBtn">+ إضافة صنف جديد</button>
@@ -230,7 +267,7 @@
                         <input type="number" id="discountValue" step="0.1" min="0" placeholder="0" class="control-input" style="padding:4px; width:70px;">
                     </div>
                 </div>
-                <div class="total-line" style="display:none;" id="printDiscountDisplay"><strong>قيمة الخصم:</strong> <span class="amount-display"><span>د.ك</span><span class="val-num" id="discountAmountSpanText">0.000</span></span></div>
+                <div class="total-line" style="display:none;" id="printDiscountDisplay"><strong>الخصم:</strong> <span class="amount-display"><span class="val-num" id="discountAmountSpanText">0.000</span></span></div>
                 <div id="freeInvoiceNote" class="free-note" style="display:none;">※ فاتورة مجانية تمثل خصم بقيمة <span id="displayFreePercent">10</span>% من السحب الآجل ※</div>
                 <div class="total-line net-amount"><strong style="font-size:18px;">صافي الفاتورة:</strong> <span class="amount-display"><span>د.ك</span><span class="val-num" id="netTotalVal" style="font-size:130%;">0.000</span></span></div>
             </div>
@@ -258,7 +295,7 @@
 </div>
 
 <script>
-    // ------------------------------ البيانات الكاملة ------------------------------
+    // ------------------------------ البيانات ------------------------------
     const customersDB = [
         "جمعية ابو حليفة - 1167", "جمعية الأندلس والرقعى - 1794", "جمعية الجابرية - 1646", "جمعية الرقة - 0117",
         "جمعية الروضة وحولي - 2165", "جمعية السالمية التعاونية - 3481", "جمعية السلام التعاونية - 0510",
@@ -292,7 +329,7 @@
         "مركز سلطان - فرع العقيلة", "مركز سلطان - فرع المسيلة", "مركز سلطان - فرع المنقف"
     ];
 
-    const itemsDB = [
+    const allItemsDB = [
         { name: "فرشاة اسنان أطفال لانشر 2016", priceCarton: 9.000, packQty: 12 },
         { name: "فرشاة اسنان أطفال لانشر 685", priceCarton: 9.000, packQty: 12 },
         { name: "فرشاة اسنان أطفال لانشر 688", priceCarton: 9.000, packQty: 12 },
@@ -306,8 +343,18 @@
         { name: "فرشاة اسنان كورونا فليكس 394", priceCarton: 11.400, packQty: 12 },
         { name: "فرشاة اسنان كورونا فليكس 381", priceCarton: 10.200, packQty: 12 }
     ];
+    
+    const itemsToExclude = [
+        "فرشاة اسنان او ماي سوفت 9912",
+        "فرشاة اسنان او ماي ميديم 9919",
+        "فرشاة اسنان كولا ميديم 192",
+        "فرشاة اسنان كورونا فليكس 394",
+        "فرشاة اسنان كورونا فليكس 381"
+    ];
+    
+    const itemsDB = allItemsDB.filter(item => !itemsToExclude.includes(item.name));
 
-    // ------------------------------ المتغيرات العامة ------------------------------
+    // ------------------------------ المتغيرات ------------------------------
     let editingInvoiceId = null;
     const customerInput = document.getElementById('customerInput');
     const branchInput = document.getElementById('branchInput');
@@ -320,18 +367,28 @@
     const freeDiscountPercent = document.getElementById('freeDiscountPercent');
     const invoiceDateInput = document.getElementById('invoiceDate');
     
-    // تعيين التاريخ الافتراضي لليوم الحالي
     const todayDate = new Date();
     const yyyy = todayDate.getFullYear();
     const mm = String(todayDate.getMonth() + 1).padStart(2, '0');
     const dd = String(todayDate.getDate()).padStart(2, '0');
     invoiceDateInput.value = `${yyyy}-${mm}-${dd}`;
     
-    // استرجاع آخر رقم فاتورة
-    const savedLastSerial = localStorage.getItem('tamba_last_invoice_serial');
-    if(savedLastSerial) invoiceNumInput.value = savedLastSerial;
+    function updateHeaderTitle() {
+        const invType = document.querySelector('input[name="invoiceType"]:checked').value;
+        const invNum = invoiceNumInput.value || 'بدون رقم';
+        mainTitle.innerText = `فاتورة ${invType === 'مجانية' ? 'مجانية' : 'بيع آجلة'} رقم: ${invNum}`;
+        freeDiscountInputGroup.style.display = (invType === 'مجانية') ? 'block' : 'none';
+        updateTotals();
+    }
     
-    // ------------------------------ دوال مساعدة ------------------------------
+    const savedLastSerial = localStorage.getItem('tamba_last_invoice_serial');
+    if(savedLastSerial) {
+        invoiceNumInput.value = savedLastSerial;
+    } else {
+        invoiceNumInput.value = "1000";
+    }
+    updateHeaderTitle();
+    
     function setupAutocomplete(inputElement, listElement, dataArray, onSelectCallback) {
         inputElement.addEventListener('input', function() {
             const val = this.value;
@@ -362,18 +419,14 @@
     });
     setupAutocomplete(branchInput, document.getElementById('branchList'), branchesDB);
     
-    function updateHeaderTitle() {
-        const invType = document.querySelector('input[name="invoiceType"]:checked').value;
-        const invNum = invoiceNumInput.value || 'بدون رقم';
-        mainTitle.innerText = `فاتورة ${invType === 'مجانية' ? 'مجانية' : 'بيع آجلة'} رقم: ${invNum}`;
-        freeDiscountInputGroup.style.display = (invType === 'مجانية') ? 'block' : 'none';
-        updateTotals();
-    }
     invoiceNumInput.addEventListener('input', updateHeaderTitle);
     radioTypes.forEach(r => r.addEventListener('change', updateHeaderTitle));
     freeDiscountPercent.addEventListener('input', updateTotals);
     
-    // ------------------------------ إدارة الأصناف ------------------------------
+    function getTensionValue(unit) {
+        return unit === 'كرتون' ? '12' : '1';
+    }
+    
     function updateRowPrice(rowId, prodNameOverride = null) {
         const tr = document.getElementById(`row-${rowId}`);
         if (!tr) return;
@@ -381,11 +434,15 @@
         const unit = tr.querySelector('.unit-select').value;
         let price = 0;
         if (prodName) {
-            const item = itemsDB.find(p => p.name === prodName);
+            const item = allItemsDB.find(p => p.name === prodName);
             if (item) price = (unit === 'كرتون') ? item.priceCarton : (item.priceCarton / item.packQty);
         }
         const priceSpan = document.getElementById(`price-${rowId}`);
         if (priceSpan) priceSpan.innerText = price.toFixed(3);
+        
+        const tensionSpan = document.getElementById(`tension-${rowId}`);
+        if (tensionSpan) tensionSpan.innerText = getTensionValue(unit);
+        
         updateRowTotal(rowId);
     }
     
@@ -400,31 +457,32 @@
     }
     
     function addNewRow(existingData = null) {
-        // تم إصلاح مشكلة الأرقام العشرية هنا بجعل الـ ID رقم صحيح دائماً
         const rowId = existingData ? existingData.id : Math.floor(Date.now() + Math.random() * 10000);
         const tr = document.createElement('tr');
         tr.id = `row-${rowId}`;
         const productValue = existingData ? existingData.product : '';
         const unitValue = existingData ? existingData.unit : 'كرتون';
         const qtyValue = existingData ? existingData.qty : '1';
+        const tensionValue = getTensionValue(unitValue);
         tr.innerHTML = `
             <td class="autocomplete-wrapper" style="text-align:right;">
                 <input type="text" class="control-input prod-input" placeholder="ابحث عن الصنف..." value="${productValue.replace(/"/g, '&quot;')}">
                 <div class="autocomplete-list prod-list" style="text-align:right;"></div>
-            </td>
-            <td><select class="control-select unit-select" onchange="updateRowPrice(${rowId})">
+              </td>
+              <td><select class="control-select unit-select" onchange="updateRowPrice(${rowId})">
                 <option value="كرتون" ${unitValue === 'كرتون' ? 'selected' : ''}>كرتون</option>
                 <option value="حبة" ${unitValue === 'حبة' ? 'selected' : ''}>حبة</option>
             </select></td>
-            <td><span class="price-val" id="price-${rowId}">${existingData ? existingData.price : '0.000'}</span></td>
-            <td><input type="number" class="control-input qty-input" value="${qtyValue}" min="1" oninput="updateRowTotal(${rowId})"></td>
-            <td><span class="total-cell row-total" id="total-${rowId}">${existingData ? existingData.total : '0.000'}</span></td>
-            <td class="no-print"><button class="remove-row-btn" onclick="document.getElementById('row-${rowId}').remove(); updateTotals();">✖</button></td>
+              <td><span class="tension-val" id="tension-${rowId}">${tensionValue}</span></td>
+              <td><span class="price-val" id="price-${rowId}">${existingData ? existingData.price : '0.000'}</span></td>
+              <td><input type="number" class="control-input qty-input" value="${qtyValue}" min="1" oninput="updateRowTotal(${rowId})"></td>
+              <td><span class="total-cell row-total" id="total-${rowId}">${existingData ? existingData.total : '0.000'}</span></td>
+              <td class="no-print"><button class="remove-row-btn" onclick="document.getElementById('row-${rowId}').remove(); updateTotals();">✖</button></td>
         `;
         invoiceRows.appendChild(tr);
         const prodInput = tr.querySelector('.prod-input');
         const prodList = tr.querySelector('.prod-list');
-        const itemNames = itemsDB.map(i => i.name);
+        const itemNames = allItemsDB.map(i => i.name);
         setupAutocomplete(prodInput, prodList, itemNames, (selectedProd) => { updateRowPrice(rowId, selectedProd); });
         if (existingData && existingData.product) updateRowPrice(rowId, existingData.product);
         else updateRowPrice(rowId);
@@ -441,6 +499,9 @@
             document.getElementById('printDiscountDisplay').style.display = 'none';
             document.getElementById('netTotalVal').innerText = "0.000";
             document.getElementById('displayFreePercent').innerText = freeDiscountPercent.value;
+            const freePercent = parseFloat(freeDiscountPercent.value) || 0;
+            const discountAmount = subtotal * (freePercent / 100);
+            document.getElementById('discountAmountSpanText').innerText = discountAmount.toFixed(3);
         } else {
             document.getElementById('discountContainerDiv').style.display = 'flex';
             document.getElementById('freeInvoiceNote').style.display = 'none';
@@ -457,12 +518,11 @@
     document.getElementById('discountValue').addEventListener('input', updateTotals);
     document.getElementById('addItemBtn').addEventListener('click', () => addNewRow());
     
-    // ------------------------------ إضافة كل الأصناف تلقائياً ------------------------------
     function populateAllItems() {
         invoiceRows.innerHTML = '';
         itemsDB.forEach(item => {
             addNewRow({
-                id: Math.floor(Date.now() + Math.random() * 10000), // تم التعديل
+                id: Math.floor(Date.now() + Math.random() * 10000),
                 product: item.name,
                 unit: 'كرتون',
                 price: item.priceCarton.toFixed(3),
@@ -473,7 +533,6 @@
         updateTotals();
     }
     
-    // ------------------------------ مسح الفاتورة ------------------------------
     function clearInvoiceData(keepInvoiceNumber = false) {
         customerInput.value = "";
         supplierNumber.value = "";
@@ -491,7 +550,6 @@
         if (confirm("هل تريد مسح جميع بيانات الفاتورة الحالية؟")) clearInvoiceData(true);
     });
     
-    // ------------------------------ فاتورة جديدة ------------------------------
     function incrementInvoiceSerial() {
         let currentVal = invoiceNumInput.value;
         let match = currentVal.match(/^(.*?)(\d+)$/);
@@ -519,7 +577,6 @@
     
     document.getElementById('newInvoiceBtn').addEventListener('click', newInvoice);
     
-    // ------------------------------ حفظ الفاتورة (تم الإصلاح) ------------------------------
     function saveCurrentInvoice() {
         if(!customerInput.value.trim()) {
             alert("يرجى إدخال اسم العميل.");
@@ -534,7 +591,6 @@
         let items = [];
         
         document.querySelectorAll('#invoiceRows tr').forEach(tr => {
-            // استخراج الـ ID الصحيح وتفادي الأخطاء القديمة
             const idMatch = tr.id.split('row-')[1]; 
             if(idMatch) {
                 items.push({
@@ -577,7 +633,6 @@
     
     document.getElementById('saveInvoiceBtn').addEventListener('click', saveCurrentInvoice);
     
-    // ------------------------------ الفواتير المحفوظة (مع الحذف) ------------------------------
     function openSavedInvoicesModal() {
         const modal = document.getElementById('savedInvoicesModal');
         const tbody = document.getElementById('savedInvoicesList');
@@ -619,7 +674,7 @@
             let saved = JSON.parse(localStorage.getItem('tamba_saved_invoices') || '[]');
             saved = saved.filter(inv => inv.id !== id);
             localStorage.setItem('tamba_saved_invoices', JSON.stringify(saved));
-            openSavedInvoicesModal(); // إعادة تحميل القائمة
+            openSavedInvoicesModal();
         }
     }
 
@@ -660,51 +715,95 @@
         
         container.classList.add('pdf-mode');
         const invType = document.querySelector('input[name="invoiceType"]:checked').value;
-        if(invType !== 'مجانية') document.getElementById('printDiscountDisplay').style.display = 'flex';
         
-        const inputsToConvert = container.querySelectorAll('select, input:not([type="radio"]):not([type="checkbox"])');
-        const revertData = [];
-        inputsToConvert.forEach(el => {
-            if (window.getComputedStyle(el).display === 'none' || el.closest('.no-print')) return;
+        const subtotal = parseFloat(document.getElementById('subtotalVal').innerText) || 0;
+        let discountDisplayText = '';
+        
+        if (invType === 'مجانية') {
+            const freePercent = parseFloat(freeDiscountPercent.value) || 0;
+            const discountAmount = subtotal * (freePercent / 100);
+            discountDisplayText = `خصم ${freePercent}% = ${discountAmount.toFixed(3)} د.ك`;
+        } else {
+            const discType = document.getElementById('discountTypeSelect').value;
+            const discVal = parseFloat(document.getElementById('discountValue').value) || 0;
+            const discountAmount = (discType === 'percent') ? subtotal * (discVal / 100) : discVal;
+            discountDisplayText = (discType === 'percent') ? `خصم ${discVal}% = ${discountAmount.toFixed(3)} د.ك` : `خصم ${discVal.toFixed(3)} د.ك`;
+        }
+        
+        const discountDisplaySpan = document.getElementById('printDiscountDisplay');
+        const discountTextSpan = discountDisplaySpan.querySelector('.amount-display .val-num');
+        if (discountTextSpan) {
+            discountTextSpan.innerText = discountDisplayText;
+        }
+        discountDisplaySpan.style.display = 'flex';
+        
+        // تحويل جميع حقول الإدخال إلى نصوص مرئية
+        const allInputs = container.querySelectorAll('.control-input, .control-select');
+        allInputs.forEach(el => {
+            if (el.style.display === 'none') return;
             const textSpan = document.createElement('span');
             textSpan.className = 'temp-pdf-text';
-            textSpan.innerText = el.tagName === 'SELECT' ? (el.options[el.selectedIndex]?.text || '') : (el.value || '');
             
-            if(el.id === 'customerInput') {
-                textSpan.style.fontSize = '1.3rem';  
+            if (el.classList.contains('prod-input')) {
+                textSpan.innerText = el.value || '';
+                textSpan.style.fontSize = '125%';
+                textSpan.style.color = '#1e4a6b';
+            } else if (el.classList.contains('unit-select')) {
+                textSpan.innerText = el.options[el.selectedIndex]?.text || '';
+            } else if (el.classList.contains('qty-input')) {
+                textSpan.innerText = el.value || '';
+            } else if (el.id === 'customerInput') {
+                textSpan.innerText = el.value || '';
+                textSpan.style.fontSize = '1.3rem';
                 textSpan.style.fontWeight = 'bold';
-            } else if(el.id === 'supplierNumber') {
-                textSpan.style.fontSize = '1.1rem';
-            } else if (el.classList.contains('prod-input')) {
-                textSpan.style.fontSize = '125%'; textSpan.style.color = '#1e4a6b';
+            } else if (el.id === 'branchInput') {
+                textSpan.innerText = el.value || '';
+            } else if (el.id === 'supplierNumber') {
+                textSpan.innerText = el.value || '';
+            } else if (el.id === 'invoiceDate') {
+                textSpan.innerText = el.value || '';
+            } else if (el.id === 'invoiceNumber') {
+                textSpan.innerText = el.value || '';
+            } else {
+                textSpan.innerText = el.value || '';
             }
             
             el.style.display = 'none';
             el.parentNode.insertBefore(textSpan, el.nextSibling);
-            revertData.push({ el, textSpan });
         });
         
+        // تحويل خلايا الجدول التي تحتوي على أرقام (الشد، السعر، الإجمالي) - تبقى ظاهرة لأنها already spans
+        // لا حاجة لتحويلها لأنها أصلاً عناصر span
+        
         try {
-            const canvas = await html2canvas(container, { scale: 1.5, backgroundColor: '#ffffff', useCORS: true });
+            const canvas = await html2canvas(container, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             let finalWidth = 210;
             let finalHeight = (canvas.height * finalWidth) / canvas.width;
             if (finalHeight > 297) { finalHeight = 297; finalWidth = (canvas.width * finalHeight) / canvas.height; }
             const xOffset = (210 - finalWidth) / 2;
-            const imgData = canvas.toDataURL('image/jpeg', 0.75);
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
             pdf.addImage(imgData, 'JPEG', xOffset, 0, finalWidth, finalHeight);
             pdf.save(`فاتورة_${invoiceNumInput.value || 'TAMBA'}.pdf`);
-        } catch (error) { alert("حدث خطأ أثناء إنشاء الـ PDF"); } 
-        finally {
-            revertData.forEach(item => { item.el.style.display = ''; item.textSpan.remove(); });
-            document.getElementById('printDiscountDisplay').style.display = 'none';
+        } catch (error) { 
+            console.error(error);
+            alert("حدث خطأ أثناء إنشاء الـ PDF"); 
+        } finally {
+            // استعادة العناصر المخفية
+            allInputs.forEach(el => {
+                el.style.display = '';
+                const nextSpan = el.nextSibling;
+                if (nextSpan && nextSpan.classList && nextSpan.classList.contains('temp-pdf-text')) {
+                    nextSpan.remove();
+                }
+            });
+            discountDisplaySpan.style.display = 'none';
             container.classList.remove('pdf-mode');
             spacer.classList.remove('active');
         }
     });
     
-    // ------------------------------ التهيئة النهائية ------------------------------
     populateAllItems();
 </script>
 </body>
