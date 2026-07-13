@@ -40,7 +40,7 @@
         
         .customer-section {
             background: #fdfdfd; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px;
-            margin-bottom: 10px; /* المسافة تحت التاريخ 0.2 سم تقريباً */
+            margin-bottom: 10px;
             border-right: 6px solid #b22234;
         }
         .row-fields {
@@ -84,7 +84,6 @@
         .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
         .items-table th { background: #b22234; color: white; padding: 12px 8px; font-weight: bold; border: 1px solid #9b2c2c; }
         .items-table td { border: 1px solid #ddd; padding: 10px 8px; vertical-align: middle; text-align: center; }
-        /* عرض الأعمدة: الصنف 45%، الكمية 6% */
         .items-table th:nth-child(1), .items-table td:nth-child(1) { width: 35%; }
         .items-table th:nth-child(5), .items-table td:nth-child(5) { width: 9%; }
         .total-cell { font-size: 1.1rem; font-weight: bold; color: #b22234; }
@@ -95,9 +94,7 @@
         .totals-card.ajala-mode { width: 60%; max-width: 280px; }
         .total-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 16px; }
         .amount-display { display: flex; align-items: center; gap: 5px; direction: ltr; font-weight: bold; }
-        .amount-display .val-num { font-size: 110%; color: #b22234; }
-        /* تكبير خط الأرقام داخل المستطيل */
-        .total-line .amount-display .val-num { font-size: 120% !important; }
+        .amount-display .val-num { font-size: 120% !important; color: #b22234; }
         .net-amount .amount-display .val-num { font-size: 130% !important; }
         .discount-controls { display: flex; gap: 10px; align-items: center; }
         .discount-controls select, .discount-controls input { border-radius: 6px; padding: 6px 10px; border: 1px solid #b22234; font-size: 14px; }
@@ -128,7 +125,33 @@
         .delete-btn:hover { background: #c82333; }
 
         /* ========== تنسيقات الـ PDF ========== */
-        .pdf-mode { padding: 20px !important; box-shadow: none !important; border-radius: 0 !important; }
+        .pdf-mode { 
+            padding: 20px !important; 
+            box-shadow: none !important; 
+            border-radius: 0 !important; 
+            min-height: 1122px !important; 
+            position: relative !important; 
+        }
+        
+        .pdf-mode .logo-area img {
+            max-height: 94px !important; 
+            margin-right: 38px !important; 
+        }
+        
+        .pdf-mode .invoice-content {
+            padding-bottom: 120px !important; 
+        }
+        
+        /* تثبيت العنوان في أسفل صفحة الـ PDF دائماً والتحكم في النزول لأسفل */
+        .pdf-mode .invoice-footer {
+            position: absolute !important;
+            bottom: 5px !important; /* يمكنك تعديلها إلى 0px أو قيمة سالبة لإنزالها أكثر حسب رغبتك */
+            left: 20px !important;
+            right: 20px !important;
+            width: auto !important;
+            margin-top: 0 !important;
+        }
+
         .pdf-mode * { font-size: 105% !important; }
         .pdf-mode .company-name-ar { font-size: calc(26px * 1.1 * 1.05) !important; }
         .pdf-mode .company-name-en { font-size: calc(15px * 1.1 * 1.05) !important; }
@@ -136,9 +159,8 @@
         .pdf-mode .items-table .total-cell, .pdf-mode .row-total { font-size: 115% !important; font-weight: bold !important; }
         .pdf-mode .totals-card { width: 60% !important; max-width: 330px !important; }
         
-        /* تصغير خط الجملة ※ فاتورة مجانية... ※ بنسبة 12% في PDF */
         .pdf-mode .free-note {
-            font-size: 76% !important;   /* 100% - 12% = 88% */
+            font-size: 76% !important;   
         }
         
         .pdf-mode .remove-row-btn,
@@ -305,7 +327,6 @@
 </div>
 
 <script>
-    // ------------------------------ البيانات ------------------------------
     const customersDB = [
         "جمعية ابو حليفة - 1167", "جمعية الأندلس والرقعى - 1794", "جمعية الجابرية - 1646", "جمعية الرقة - 0117",
         "جمعية الروضة وحولي - 2165", "جمعية السالمية التعاونية - 3481", "جمعية السلام التعاونية - 0510",
@@ -364,7 +385,6 @@
     
     const itemsDB = allItemsDB.filter(item => !itemsToExclude.includes(item.name));
 
-    // ------------------------------ المتغيرات ------------------------------
     let editingInvoiceId = null;
     const customerInput = document.getElementById('customerInput');
     const branchInput = document.getElementById('branchInput');
@@ -511,7 +531,6 @@
         if (existingData && existingData.product) updateRowPrice(rowId, existingData.product);
         else updateRowPrice(rowId);
         
-        // التنقل بالسهم لأسفل
         const qtyInput = tr.querySelector('.qty-input');
         qtyInput.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowDown') {
@@ -755,14 +774,12 @@
     document.getElementById('viewInvoicesBtn').addEventListener('click', openSavedInvoicesModal);
     document.getElementById('closeModalBtn').addEventListener('click', closeSavedInvoicesModal);
     
-    // ------------------------------ تصدير PDF ------------------------------
     document.getElementById('exportPDFBtn').addEventListener('click', async function() {
         const container = document.getElementById('invoiceContainer');
         const spacer = document.getElementById('pdfSpacer');
         spacer.classList.add('active');
         container.classList.add('pdf-mode');
         
-        // تحويل حقول الإدخال إلى نصوص
         const allInputs = container.querySelectorAll('.control-input, .control-select');
         const revertData = [];
         allInputs.forEach(el => {
@@ -811,7 +828,11 @@
             pdf.addImage(imgData, 'JPEG', xOffset, 0, finalWidth, finalHeight);
             
             const invType = document.querySelector('input[name="invoiceType"]:checked').value;
-            const fileName = `فاتورة ${invType === 'مجانية' ? 'مجانية' : 'آجلة'} رقم ${invoiceNumInput.value || 'TAMBA'}.pdf`;
+            const invNum = invoiceNumInput.value || 'بدون_رقم';
+            const cName = customerInput.value.trim() || 'بدون_عميل';
+            const bName = branchInput.value.trim() || 'بدون_فرع';
+            const fileName = `فاتورة ${invType === 'مجانية' ? 'مجانية' : 'آجلة'} رقم ${invNum} - ${cName} - ${bName}.pdf`;
+            
             pdf.save(fileName);
         } catch (error) { 
             console.error(error);
