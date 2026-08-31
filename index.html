@@ -468,10 +468,15 @@
     radioTypes.forEach(r => r.addEventListener('change', updateHeaderTitle));
     freeDiscountPercent.addEventListener('input', updateTotals);
     
-    function getTensionValue(unit) {
-        return unit === 'كرتون' ? '12' : '1';
+    // ===== دالة جديدة لحساب الشد بناءً على المنتج والوحدة =====
+    function getTensionForProduct(productName, unit) {
+        if (unit !== 'كرتون') return '1';
+        if (!productName) return '12';
+        const item = allItemsDB.find(p => p.name === productName);
+        return item ? item.packQty.toString() : '12';
     }
     
+    // تعديل دالة updateRowPrice لاستخدام الدالة الجديدة وتحديث الشد
     function updateRowPrice(rowId, prodNameOverride = null) {
         const tr = document.getElementById(`row-${rowId}`);
         if (!tr) return;
@@ -485,8 +490,9 @@
         const priceSpan = document.getElementById(`price-${rowId}`);
         if (priceSpan) priceSpan.innerText = price.toFixed(3);
         
+        // تحديث قيمة الشد باستخدام الدالة الجديدة
         const tensionSpan = document.getElementById(`tension-${rowId}`);
-        if (tensionSpan) tensionSpan.innerText = getTensionValue(unit);
+        if (tensionSpan) tensionSpan.innerText = getTensionForProduct(prodName, unit);
         
         updateRowTotal(rowId);
     }
@@ -508,7 +514,8 @@
         const productValue = existingData ? existingData.product : '';
         const unitValue = existingData ? existingData.unit : 'كرتون';
         const qtyValue = existingData ? existingData.qty : '1';
-        const tensionValue = getTensionValue(unitValue);
+        // حساب الشد الأولي
+        const initialTension = getTensionForProduct(productValue, unitValue);
         tr.innerHTML = `
             <td class="autocomplete-wrapper" style="text-align:right;">
                 <input type="text" class="control-input prod-input" placeholder="ابحث عن الصنف..." value="${productValue.replace(/"/g, '&quot;')}">
@@ -518,7 +525,7 @@
                 <option value="كرتون" ${unitValue === 'كرتون' ? 'selected' : ''}>كرتون</option>
                 <option value="حبة" ${unitValue === 'حبة' ? 'selected' : ''}>حبة</option>
             </select></td>
-                <td><span class="tension-val" id="tension-${rowId}">${tensionValue}</span></td>
+                <td><span class="tension-val" id="tension-${rowId}">${initialTension}</span></td>
                 <td><span class="price-val" id="price-${rowId}">${existingData ? existingData.price : '0.000'}</span></td>
                 <td><input type="number" class="control-input qty-input" value="${qtyValue}" min="1" step="1" oninput="updateRowTotal(${rowId})"></td>
                 <td><span class="total-cell row-total" id="total-${rowId}">${existingData ? existingData.total : '0.000'}</span></td>
@@ -529,6 +536,7 @@
         const prodList = tr.querySelector('.prod-list');
         const itemNames = allItemsDB.map(i => i.name);
         setupAutocomplete(prodInput, prodList, itemNames, (selectedProd) => { updateRowPrice(rowId, selectedProd); });
+        // تحديث السعر والشد بناءً على القيمة الحالية (إذا كانت موجودة)
         if (existingData && existingData.product) updateRowPrice(rowId, existingData.product);
         else updateRowPrice(rowId);
         
