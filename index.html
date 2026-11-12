@@ -916,7 +916,7 @@
                 deleteBtn.innerHTML = '🗑️ حذف';
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.onclick = () => {
-                    const pass = prompt("أدخل كلمة المرور للحذف (123321):");
+                    const pass = prompt("أدخل كلمة المرور (Yasser):");
                     if (pass === "123321") deleteSavedInvoice(inv.id);
                     else if(pass !== null) alert("كلمة المرور غير صحيحة!");
                 };
