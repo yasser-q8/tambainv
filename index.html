@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تامبا الذهبية - نظام الفواتير المتقدم  </title>
+    <title>تامبا الذهبية - نظام الفواتير المتقدم </title>
+    
+    <!-- شعار الموقع وأيقونة الحفظ على شاشة الآيفون -->
+    <link rel="icon" href="https://i.postimg.cc/kgdKSgHH/Tamba-Logo-cilcle.jpg">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/kgdKSgHH/Tamba-Logo-cilcle.jpg">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -35,10 +40,10 @@
 
         .invoice-system { flex: 1; max-width: 1050px; order: 2; }
 
-        /* زر قائمة الموبايل للشريط الجانبي */
+        /* زر قائمة الموبايل للشريط الجانبي (في الأعلى) */
         .mobile-menu-toggle {
-            display: none; position: fixed; bottom: 20px; right: 20px; background: #b22234; color: white;
-            border: none; border-radius: 50px; width: 55px; height: 55px; font-size: 24px; cursor: pointer;
+            display: none; position: fixed; top: 15px; right: 15px; background: #b22234; color: white;
+            border: none; border-radius: 50px; width: 45px; height: 45px; font-size: 22px; cursor: pointer;
             z-index: 2500; box-shadow: 0 4px 15px rgba(0,0,0,0.3); align-items: center; justify-content: center;
         }
 
@@ -377,7 +382,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA1aXHzFXeCoj_wEB8fSu63Dl7H-x2p0WE",
@@ -413,7 +418,7 @@
         }
     }
 
-    // استعادة ومزامنة البيانات مرة واحدة فقط عند فتح الموقع وتحديث رقم الفاتورة لأكبر رقم + 1
+    // استعادة ومزامنة البيانات مرة واحدة تلقائياً عند فتح الموقع
     async function restoreFromFirebaseOnStartup() {
         try {
             const querySnapshot = await getDocs(collection(db, "invoices"));
@@ -453,12 +458,33 @@
                 }
             });
 
-            // تحديث رقم الفاتورة ليصبح التالي لأكبر رقم موجود في الداتا المدمجة
-            updateNextInvoiceNumberAfterSync();
+            if (typeof window.updateNextInvoiceNumberAfterSync === 'function') {
+                window.updateNextInvoiceNumberAfterSync();
+            }
         } catch (error) {
             console.error("خطأ في المزامنة عند الفتح:", error);
         }
     }
+
+    // دالة حذف الفاتورة من محلي و من Firebase نهائياً
+    window.deleteInvoiceFromCloudAndLocal = async function(invoiceNumber, id) {
+        let saved = JSON.parse(localStorage.getItem('tamba_saved_invoices') || '[]');
+        saved = saved.filter(inv => inv.id !== id);
+        localStorage.setItem('tamba_saved_invoices', JSON.stringify(saved));
+
+        try {
+            await deleteDoc(doc(db, "invoices", String(invoiceNumber)));
+        } catch (e) {
+            console.error("خطأ في حذف المستند من السحابة:", e);
+        }
+
+        if (typeof window.openSavedInvoicesModal === 'function') {
+            window.openSavedInvoicesModal();
+        }
+        if (typeof window.updateNextInvoiceNumberAfterSync === 'function') {
+            window.updateNextInvoiceNumberAfterSync();
+        }
+    };
 
     window.backupToFirebase = backupToFirebase;
     window.restoreFromFirebase = () => restoreFromFirebaseOnStartup().then(() => alert("✅ تمت المزامنة بنجاح!"));
@@ -472,6 +498,15 @@
     function toggleMobileSidebar() {
         document.getElementById('sidebarElement').classList.toggle('mobile-open');
     }
+
+    // إغلاق الشريط الجانبي عند الضغط في أي مكان بالشاشة على الموبايل
+    document.addEventListener('click', (e) => {
+        const sidebar = document.getElementById('sidebarElement');
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+        if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
 
     const baseCustomersDB = [
         "جمعية ابو حليفة - 1167", "جمعية الأندلس والرقعى - 1794", "جمعية الجابرية - 1646", "جمعية الرقة - 0117",
@@ -580,8 +615,8 @@
         updateTotals();
     }
     
-    // حساب الرقم التالي لأكبر رقم موجود في الداتا
-    function updateNextInvoiceNumberAfterSync() {
+    // جعل رقم الفاتورة الجديدة الرقم التالي لأكبر رقم موجود في الداتا
+    window.updateNextInvoiceNumberAfterSync = function() {
         const saved = JSON.parse(localStorage.getItem('tamba_saved_invoices') || '[]');
         let maxNum = 999;
         saved.forEach(inv => {
@@ -595,7 +630,7 @@
         invoiceNumInput.value = nextSerial;
         localStorage.setItem('tamba_last_invoice_serial', nextSerial);
         updateHeaderTitle();
-    }
+    };
 
     updateNextInvoiceNumberAfterSync();
     
@@ -888,7 +923,7 @@
     
     document.getElementById('saveInvoiceBtn').addEventListener('click', saveCurrentInvoice);
     
-    function openSavedInvoicesModal() {
+    window.openSavedInvoicesModal = function() {
         const modal = document.getElementById('savedInvoicesModal');
         const tbody = document.getElementById('savedInvoicesList');
         const saved = JSON.parse(localStorage.getItem('tamba_saved_invoices') || '[]');
@@ -916,9 +951,12 @@
                 deleteBtn.innerHTML = '🗑️ حذف';
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.onclick = () => {
-                    const pass = prompt("أدخل كلمة المرور (Yasser):");
-                    if (pass === "123321") deleteSavedInvoice(inv.id);
-                    else if(pass !== null) alert("كلمة المرور غير صحيحة!");
+                    const pass = prompt("أدخل كلمة المرور  (Yasser):");
+                    if (pass === "123321") {
+                        if(typeof window.deleteInvoiceFromCloudAndLocal === 'function') {
+                            window.deleteInvoiceFromCloudAndLocal(inv.number, inv.id);
+                        }
+                    } else if(pass !== null) alert("كلمة المرور غير صحيحة!");
                 };
 
                 btnCell.appendChild(editBtn);
@@ -926,15 +964,7 @@
             });
         }
         modal.style.display = 'flex';
-    }
-    
-    function deleteSavedInvoice(id) {
-        let saved = JSON.parse(localStorage.getItem('tamba_saved_invoices') || '[]');
-        saved = saved.filter(inv => inv.id !== id);
-        localStorage.setItem('tamba_saved_invoices', JSON.stringify(saved));
-        if(typeof window.backupToFirebase === 'function') window.backupToFirebase();
-        openSavedInvoicesModal();
-    }
+    };
 
     document.getElementById('viewInvoicesBtn').addEventListener('click', openSavedInvoicesModal);
     document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('savedInvoicesModal').style.display = 'none');
