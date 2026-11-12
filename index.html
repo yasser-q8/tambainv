@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تامبا الذهبية - نظام فواتير متقدم مع مزامنة Firebase</title>
+    <title>تامبا الذهبية - نظام الفواتير المتقدم   </title>
     
     <link rel="icon" href="https://i.postimg.cc/kgdKSgHH/Tamba-Logo-cilcle.jpg">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/kgdKSgHH/Tamba-Logo-cilcle.jpg">
@@ -183,8 +183,8 @@
         <button id="viewInvoicesBtn" class="sidebar-btn btn-warning">📂 الفواتير المحفوظة</button>
         <button id="clearAllDataBtn" class="sidebar-btn btn-danger">🗑️ مسح الفاتورة الحالية</button>
         
-        <h3 style="margin-top: 10px;">إدارة وحفظ Firebase</h3>
-        <button id="manualBackupBtn" class="sidebar-btn btn-success">☁️ نسخ احتياطي لـ Firebase</button>
+        <h3 style="margin-top: 10px;">إدارة وحفظ </h3>
+        <button id="manualBackupBtn" class="sidebar-btn btn-success">☁️ نسخ احتياطي  </button>
         <button id="manualRestoreBtn" class="sidebar-btn btn-info">📥 استعادة ومزامنة الداتا</button>
         <button id="openSettingsBtn" class="sidebar-btn btn-warning">⚙️ الإعدادات (أصناف، عملاء، فروع)</button>
     </div>
@@ -935,7 +935,7 @@
                 deleteBtn.innerHTML = '🗑️ حذف';
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.onclick = () => {
-                    const pass = prompt("أدخل كلمة المرور للحذف (123321):");
+                    const pass = prompt("أدخل كلمة المرور  (Yasser):");
                     if (pass === "123321") {
                         if(typeof window.deleteInvoiceFromCloudAndLocal === 'function') {
                             window.deleteInvoiceFromCloudAndLocal(inv.number, inv.id);
